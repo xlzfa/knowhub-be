@@ -1,0 +1,45 @@
+### Java ###
+*.class
+*.log
+logs/
+log/
+target/
+build/
+
+### Maven ###
+.mvn/wrapper/maven-wrapper.properties
+
+
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### VS Code ###
+.vscode/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### OS ###
+.DS_Store
+Thumbs.db
+desktop.ini
+
+### Node ###
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+### Temp ###
+tmp/
+temp/
