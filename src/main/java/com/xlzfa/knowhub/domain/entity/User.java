@@ -1,4 +1,6 @@
-package com.xlzfa.knowhub.entity;
+package com.xlzfa.knowhub.domain.entity;
+
+import org.springframework.context.annotation.Bean;
 
 import java.util.Date;
 import java.io.Serializable;
@@ -9,6 +11,7 @@ import java.io.Serializable;
  * @author makejava
  * @since 2025-12-13 16:21:33
  */
+
 public class User implements Serializable {
     private static final long serialVersionUID = 533784773908389241L;
 

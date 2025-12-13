@@ -28,7 +28,7 @@ mybatis-plus:
       id-type: auto
 
 jwt:
-  SecretKey: "y7Fh9kG2vR8uQp6XsD3fT0bN4mL1wC0z"
-  Ttl: 3600000
+  secret-key: "y7Fh9kG2vR8uQp6XsD3fT0bN4mL1wC0z"
+  ttl: 3600000
 
 debug: false
