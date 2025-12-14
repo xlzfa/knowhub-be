@@ -21,6 +21,13 @@ public class JwtTokenInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
         try {
+            //放行swagger
+            String uri = request.getRequestURI();
+            if (uri.startsWith("/v3/api-docs")
+                    || uri.startsWith("/swagger")
+                    || uri.startsWith("/swagger-ui")) {
+                return true;
+            }
             //放行静态资源
             if(! (handler instanceof HandlerMethod)){
                 return true;
