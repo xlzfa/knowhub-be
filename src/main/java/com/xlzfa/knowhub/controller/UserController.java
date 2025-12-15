@@ -23,6 +23,11 @@ public class UserController {
         return userService.login(userDto);
     }
 
+    @GetMapping("/info/{id}")
+    @Operation( summary = "用户信息")
+    public ResponseResult userInfo(@PathVariable Long id){
+        return userService.userInfo(id);
+    }
 
 
 }

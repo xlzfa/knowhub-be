@@ -7,6 +7,7 @@ import com.xlzfa.knowhub.config.JwtProperties;
 import com.xlzfa.knowhub.dao.UserMapper;
 import com.xlzfa.knowhub.domain.dto.UserDto;
 import com.xlzfa.knowhub.domain.entity.User;
+import com.xlzfa.knowhub.domain.vo.UserInfoVo;
 import com.xlzfa.knowhub.domain.vo.UserLoginVo;
 import com.xlzfa.knowhub.service.UserService;
 import com.xlzfa.knowhub.util.JwtUtil;
@@ -55,4 +56,35 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         return ResponseResult.success(userLoginVo);
     }
+
+    @Override
+    public ResponseResult userInfo(Long id) {
+
+        User user = getById(id);
+        UserInfoVo userInfoVo = UserInfoVo.builder()
+                .id(id)
+                .username(user.getUsername())
+                .avatar(user.getAvatar())
+                .bio(user.getBio())
+                .email(user.getEmail())
+                .createTime(user.getCreateTime())
+                .build();
+
+        return ResponseResult.success(userInfoVo);
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
