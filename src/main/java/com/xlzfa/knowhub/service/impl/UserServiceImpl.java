@@ -14,6 +14,7 @@ import com.xlzfa.knowhub.util.JwtUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
 
@@ -79,13 +80,44 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public ResponseResult updateUser(UserDto userDto) {
 
-        User user = new User();
+//        System.out.println(userDto.toString());
 
-        BeanUtils.copyProperties(userDto,user);
+        User user = getById(userDto.getId());
+
+        if (StringUtils.hasText(userDto.getUsername())) {
+            user.setUsername(userDto.getUsername());
+        }
+
+//        System.out.println("---------" + userDto.getUsername() + user.getUsername());
+
+        if (StringUtils.hasText(userDto.getPassword())) {
+            user.setPassword(userDto.getPassword());
+        }
+
+        if (StringUtils.hasText(userDto.getEmail())) {
+            user.setEmail(userDto.getEmail());
+        }
+
+        if (StringUtils.hasText(userDto.getAvatar())) {
+            user.setAvatar(userDto.getAvatar());
+        }
+
+        if (StringUtils.hasText(userDto.getBio())) {
+            user.setBio(userDto.getBio());
+        }
 
         updateById(user);
 
-        return ResponseResult.success();
+        UserInfoVo userInfoVo = UserInfoVo.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .avatar(user.getAvatar())
+                .bio(user.getBio())
+                .email(user.getEmail())
+                .createTime(user.getCreateTime())
+                .build();
+
+        return ResponseResult.success(userInfoVo);
     }
 }
 
