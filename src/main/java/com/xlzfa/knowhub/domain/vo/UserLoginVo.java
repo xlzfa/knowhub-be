@@ -18,6 +18,8 @@ public class UserLoginVo implements Serializable {
 
     private String username;
 
+    private String email;
+
     private String avatar;
 
     private String bio;

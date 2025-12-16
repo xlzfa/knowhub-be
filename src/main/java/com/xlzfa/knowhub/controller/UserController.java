@@ -29,5 +29,11 @@ public class UserController {
         return userService.userInfo(id);
     }
 
+    @PostMapping("/update")
+    @Operation( summary = "用户信息更新")
+    public ResponseResult updateUser(@RequestBody UserDto userDto) {
+        return userService.updateUser(userDto);
+    }
+
 
 }

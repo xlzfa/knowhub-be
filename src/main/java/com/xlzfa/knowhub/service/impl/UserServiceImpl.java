@@ -11,6 +11,7 @@ import com.xlzfa.knowhub.domain.vo.UserInfoVo;
 import com.xlzfa.knowhub.domain.vo.UserLoginVo;
 import com.xlzfa.knowhub.service.UserService;
 import com.xlzfa.knowhub.util.JwtUtil;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -50,6 +51,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 .id(user.getId())
                 .username(user.getUsername())
                 .avatar(user.getAvatar())
+                .email(user.getEmail())
                 .bio(user.getBio())
                 .token(token)
                 .build();
@@ -70,7 +72,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 .createTime(user.getCreateTime())
                 .build();
 
+
         return ResponseResult.success(userInfoVo);
+    }
+
+    @Override
+    public ResponseResult updateUser(UserDto userDto) {
+
+        User user = new User();
+
+        BeanUtils.copyProperties(userDto,user);
+
+        updateById(user);
+
+        return ResponseResult.success();
     }
 }
 
