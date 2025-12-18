@@ -43,3 +43,8 @@ pnpm-debug.log*
 ### Temp ###
 tmp/
 temp/
+
+
+# 开发配置
+src/main/resources/application-dev.yml
+src/main/resources/application-prod.yml
