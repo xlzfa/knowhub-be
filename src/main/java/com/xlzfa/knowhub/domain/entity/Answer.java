@@ -16,6 +16,9 @@ public class Answer implements Serializable {
 
     private Long questionId;
 
+    private Integer status;
+
+
     private Long userId;
 
     private String content;
@@ -41,6 +44,14 @@ public class Answer implements Serializable {
 
     public void setQuestionId(Long questionId) {
         this.questionId = questionId;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 
     public Long getUserId() {

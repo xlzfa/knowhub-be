@@ -16,6 +16,8 @@ public class Question implements Serializable {
 
     private Long userId;
 
+    private Integer status;
+
     private String title;
 
     private String content;
@@ -29,6 +31,10 @@ public class Question implements Serializable {
     private Date createTime;
 
     private Date updateTime;
+
+    public Question(Integer status) {
+        this.status = status;
+    }
 
 
     public Long getId() {
@@ -47,6 +53,13 @@ public class Question implements Serializable {
         this.userId = userId;
     }
 
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
     public String getTitle() {
         return title;
     }
@@ -66,6 +79,8 @@ public class Question implements Serializable {
     public Integer getViewCount() {
         return viewCount;
     }
+
+
 
     public void setViewCount(Integer viewCount) {
         this.viewCount = viewCount;

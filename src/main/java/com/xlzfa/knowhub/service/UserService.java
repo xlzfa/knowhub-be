@@ -7,7 +7,6 @@ import com.xlzfa.knowhub.domain.dto.UserDto;
 import com.xlzfa.knowhub.domain.entity.User;
 import org.springframework.stereotype.Service;
 
-@Service
 public interface UserService extends IService<User> {
 
 
