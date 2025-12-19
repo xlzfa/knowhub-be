@@ -31,6 +31,14 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
     @Override
     public ResponseResult answerFeed(Integer pageNum, Integer pageSize) {
 
+        if (pageNum == null || pageNum < 1) {
+            pageNum = 1;
+        }
+        if (pageSize == null || pageSize < 1 || pageSize > 50) {
+            pageSize = 10;
+        }
+
+
         Page<Answer> page = new Page<>(pageNum, pageSize);
 
         LambdaQueryWrapper<Answer> wrapper = new LambdaQueryWrapper<>();
@@ -48,7 +56,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
                 BeanCopyUtils.copyBeanList(page.getRecords(), AnswerVo.class);
 
         vos.forEach( vo ->{
-
+            //TODO 后期优化
             Question question = questionService.getById(vo.getQuestionId());
             if (question != null){
                 vo.setQuertionTitle(question.getTitle());
