@@ -9,10 +9,12 @@ import com.xlzfa.knowhub.dao.AnswerMapper;
 import com.xlzfa.knowhub.dao.QuestionMapper;
 import com.xlzfa.knowhub.domain.entity.Answer;
 import com.xlzfa.knowhub.domain.entity.Question;
+import com.xlzfa.knowhub.domain.entity.User;
 import com.xlzfa.knowhub.domain.vo.AnswerVo;
 import com.xlzfa.knowhub.domain.vo.PageVo;
 import com.xlzfa.knowhub.service.AnswerService;
 import com.xlzfa.knowhub.service.QuestionService;
+import com.xlzfa.knowhub.service.UserService;
 import com.xlzfa.knowhub.util.BeanCopyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,8 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
     private AnswerMapper answerMapper;
     @Autowired
     private QuestionService questionService;
+    @Autowired
+    private UserService userService;
 
     @Override
     public ResponseResult answerFeed(Integer pageNum, Integer pageSize) {
@@ -60,6 +64,15 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
             Question question = questionService.getById(vo.getQuestionId());
             if (question != null){
                 vo.setQuertionTitle(question.getTitle());
+            }
+
+        });
+
+        vos.forEach( vo ->{
+            //TODO 后期优化
+            User user = userService.getById(vo.getUserId());
+            if (user != null){
+                vo.setUser(user.getUsername());
             }
 
         });

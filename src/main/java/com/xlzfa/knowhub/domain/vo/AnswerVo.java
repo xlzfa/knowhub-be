@@ -24,6 +24,8 @@ public class AnswerVo {
 
     private Long userId;
 
+    private String user;
+
     private String content;
 
     private Integer likeCount;
