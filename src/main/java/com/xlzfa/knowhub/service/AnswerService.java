@@ -8,4 +8,5 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface AnswerService extends IService<Answer> {
     ResponseResult answerFeed(Integer pageNum, Integer pageSize);
 
+    ResponseResult updateLike(Long id, boolean like);
 }

@@ -82,4 +82,25 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
         return ResponseResult.success(pageVo);
 
     }
+
+    @Override
+    public ResponseResult updateLike(Long id, boolean like) {
+        //TODO 后期先装redis，定时写入mysql
+
+
+        if (like){
+            this.lambdaUpdate()
+                    .setSql("like_count = like_count + 1")
+                    .eq(Answer::getId, id)
+                    .update();
+        }else {
+            this.lambdaUpdate()
+                    .setSql("like_count = IF(like_count > 0, like_count - 1, 0)")
+                    .eq(Answer::getId, id)
+                    .update();
+        }
+
+        return ResponseResult.success();
+
+    }
 }
