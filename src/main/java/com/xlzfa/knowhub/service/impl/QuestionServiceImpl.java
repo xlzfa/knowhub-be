@@ -12,6 +12,7 @@ import com.xlzfa.knowhub.domain.pojo.Question;
 import com.xlzfa.knowhub.domain.pojo.User;
 import com.xlzfa.knowhub.domain.vo.AnswerVo;
 import com.xlzfa.knowhub.domain.vo.PageVo;
+import com.xlzfa.knowhub.domain.vo.QuestionDetailVo;
 import com.xlzfa.knowhub.domain.vo.QuestionVo;
 import com.xlzfa.knowhub.service.QuestionService;
 import com.xlzfa.knowhub.service.UserService;
@@ -33,6 +34,28 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
 
     @Override
     public ResponseResult questionDetail(Long id, Integer pageNum, Integer pageSize) {
+
+        Question question = getById(id);
+
+        QuestionVo questionVo = BeanCopyUtils.copyBean(question, QuestionVo.class);
+
+        questionVo.setUser(userService.getById(id).getUsername());
+
+        //TODO 先写死5，以后改answer
+        questionVo.setAnswerCount(5L);
+
+        QuestionDetailVo questionDetailVo = QuestionDetailVo.builder()
+                .question(questionVo)
+                .answers(AnswerList(id, pageNum, pageSize))
+                .build();
+
+
+        return ResponseResult.success(questionDetailVo);
+
+    }
+
+
+    public PageVo<AnswerVo> AnswerList(Long id, Integer pageNum, Integer pageSize){
 
         if (pageNum == null || pageNum < 1) {
             pageNum = 1;
@@ -72,9 +95,14 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
 
         PageVo pageVo = new PageVo(vos, page.getTotal());
 
-        return ResponseResult.success(pageVo);
+        return pageVo;
 
     }
+
+
+
+
+
 
     @Override
     public ResponseResult questionInfo(Long id) {
