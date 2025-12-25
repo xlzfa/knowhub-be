@@ -6,4 +6,6 @@ import com.xlzfa.knowhub.domain.entity.Question;
 
 public interface QuestionService extends IService<Question> {
     ResponseResult questionDetail(Long id, Integer pageNum, Integer pageSize);
+
+    ResponseResult questionInfo(Long id);
 }

@@ -12,6 +12,7 @@ import com.xlzfa.knowhub.domain.entity.Question;
 import com.xlzfa.knowhub.domain.entity.User;
 import com.xlzfa.knowhub.domain.vo.AnswerVo;
 import com.xlzfa.knowhub.domain.vo.PageVo;
+import com.xlzfa.knowhub.domain.vo.QuestionVo;
 import com.xlzfa.knowhub.service.QuestionService;
 import com.xlzfa.knowhub.service.UserService;
 import com.xlzfa.knowhub.util.BeanCopyUtils;
@@ -73,9 +74,17 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
 
         return ResponseResult.success(pageVo);
 
+    }
 
+    @Override
+    public ResponseResult questionInfo(Long id) {
 
+        Question question = getById(id);
 
+        QuestionVo questionVo = BeanCopyUtils.copyBean(question, QuestionVo.class);
 
+        questionVo.setUser(userService.getById(id).getUsername());
+
+        return ResponseResult.success(questionVo);
     }
 }

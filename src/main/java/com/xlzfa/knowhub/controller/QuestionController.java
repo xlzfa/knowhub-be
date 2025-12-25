@@ -22,5 +22,9 @@ public class QuestionController {
         return questionService.questionDetail(id,pageNum,pageSize);
     }
 
-
+    @GetMapping("/{id}")
+    @Operation( summary = "问题信息")
+    public ResponseResult questionInfo(@PathVariable Long id){
+        return questionService.questionInfo(id);
+    }
 }
