@@ -1,6 +1,4 @@
-package com.xlzfa.knowhub.domain.entity;
-
-import org.springframework.context.annotation.Bean;
+package com.xlzfa.knowhub.domain.pojo;
 
 import java.util.Date;
 import java.io.Serializable;

@@ -1,4 +1,4 @@
-package com.xlzfa.knowhub.domain.entity;
+package com.xlzfa.knowhub.domain.pojo;
 
 import java.io.Serializable;
 

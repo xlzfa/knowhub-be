@@ -1,24 +1,22 @@
-package com.xlzfa.knowhub.domain.entity;
+package com.xlzfa.knowhub.domain.pojo;
 
 import java.util.Date;
 import java.io.Serializable;
 
 /**
- * (LikeRecord)实体类
+ * (Favorite)实体类
  *
  * @author makejava
- * @since 2025-12-13 16:24:29
+ * @since 2025-12-13 16:24:38
  */
-public class LikeRecord implements Serializable {
-    private static final long serialVersionUID = -74294123330935029L;
+public class Favorite implements Serializable {
+    private static final long serialVersionUID = -41379077538437415L;
 
     private Long id;
 
     private Long userId;
 
-    private Long targetId;
-
-    private Integer targetType;
+    private Long questionId;
 
     private Date createTime;
 
@@ -39,20 +37,12 @@ public class LikeRecord implements Serializable {
         this.userId = userId;
     }
 
-    public Long getTargetId() {
-        return targetId;
+    public Long getQuestionId() {
+        return questionId;
     }
 
-    public void setTargetId(Long targetId) {
-        this.targetId = targetId;
-    }
-
-    public Integer getTargetType() {
-        return targetType;
-    }
-
-    public void setTargetType(Integer targetType) {
-        this.targetType = targetType;
+    public void setQuestionId(Long questionId) {
+        this.questionId = questionId;
     }
 
     public Date getCreateTime() {

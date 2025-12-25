@@ -1,7 +1,7 @@
 package com.xlzfa.knowhub.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.xlzfa.knowhub.domain.entity.Answer;
+import com.xlzfa.knowhub.domain.pojo.Answer;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
