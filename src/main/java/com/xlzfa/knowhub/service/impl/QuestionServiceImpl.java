@@ -115,4 +115,30 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
 
         return ResponseResult.success(questionVo);
     }
+
+    @Override
+    public ResponseResult updateLike(Long id, Boolean like) {
+
+        //TODO 后期先装redis，定时写入mysql
+
+
+        if (like){
+            this.lambdaUpdate()
+                    .setSql("like_count = like_count + 1")
+                    .eq(Question::getId, id)
+                    .update();
+        }else {
+            this.lambdaUpdate()
+                    .setSql("like_count = IF(like_count > 0, like_count - 1, 0)")
+                    .eq(Question::getId, id)
+                    .update();
+        }
+
+        return ResponseResult.success();
+
+
+
+
+
+    }
 }

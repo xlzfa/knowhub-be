@@ -8,4 +8,6 @@ public interface QuestionService extends IService<Question> {
     ResponseResult questionDetail(Long id, Integer pageNum, Integer pageSize);
 
     ResponseResult questionInfo(Long id);
+
+    ResponseResult updateLike(Long id, Boolean like);
 }

@@ -2,6 +2,7 @@ package com.xlzfa.knowhub.controller;
 
 
 import com.xlzfa.knowhub.common.ResponseResult;
+import com.xlzfa.knowhub.domain.dto.LikeDto;
 import com.xlzfa.knowhub.service.QuestionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,5 +27,11 @@ public class QuestionController {
     @Operation( summary = "问题信息")
     public ResponseResult questionInfo(@PathVariable Long id){
         return questionService.questionInfo(id);
+    }
+
+    @PostMapping("/like")
+    @Operation( summary = "点赞功能")
+    public ResponseResult answerLike(@RequestBody LikeDto dto){
+        return questionService.updateLike(dto.getId(), dto.getLike());
     }
 }
