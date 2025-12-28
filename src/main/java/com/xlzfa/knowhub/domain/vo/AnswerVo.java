@@ -20,6 +20,8 @@ public class AnswerVo {
 
     private String quertionTitle;
 
+    private PageVo<CommentVo> comments;
+
     private Integer status;
 
     private Long userId;

@@ -6,14 +6,14 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xlzfa.knowhub.common.ResponseResult;
 import com.xlzfa.knowhub.common.SystemConstants;
 import com.xlzfa.knowhub.dao.AnswerMapper;
+import com.xlzfa.knowhub.dao.CommentMapper;
 import com.xlzfa.knowhub.dao.QuestionMapper;
 import com.xlzfa.knowhub.domain.pojo.Answer;
+import com.xlzfa.knowhub.domain.pojo.Comment;
 import com.xlzfa.knowhub.domain.pojo.Question;
 import com.xlzfa.knowhub.domain.pojo.User;
-import com.xlzfa.knowhub.domain.vo.AnswerVo;
-import com.xlzfa.knowhub.domain.vo.PageVo;
-import com.xlzfa.knowhub.domain.vo.QuestionDetailVo;
-import com.xlzfa.knowhub.domain.vo.QuestionVo;
+import com.xlzfa.knowhub.domain.vo.*;
+import com.xlzfa.knowhub.service.CommentService;
 import com.xlzfa.knowhub.service.QuestionService;
 import com.xlzfa.knowhub.service.UserService;
 import com.xlzfa.knowhub.util.BeanCopyUtils;
@@ -31,6 +31,9 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private CommentMapper commentMapper;
 
     @Override
     public ResponseResult questionDetail(Long id, Integer pageNum, Integer pageSize) {
@@ -90,7 +93,16 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
                 vo.setUser(user.getUsername());
                 vo.setUserId(user.getId());
             }
+            //只返回前三条
+            PageVo<CommentVo> commentPage = commentPage(vo.getId(), 1, 3);
 
+            vo.setComments(commentPage);
+
+
+        });
+
+        vos.forEach( vo ->{
+            System.out.println(vo.getComments().getRows().toString());
         });
 
         PageVo pageVo = new PageVo(vos, page.getTotal());
@@ -100,6 +112,46 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
     }
 
 
+    public PageVo<CommentVo> commentPage(Long id, Integer pageNum, Integer pageSize){
+
+        if (pageNum == null || pageNum < 1) {
+            pageNum = 1;
+        }
+        if (pageSize == null || pageSize < 1 || pageSize > 50) {
+            pageSize = 10;
+        }
+
+
+        Page<Comment> page = new Page<>(pageNum, pageSize);
+
+        LambdaQueryWrapper<Comment> wrapper = new LambdaQueryWrapper<>();
+
+        wrapper.eq(Comment::getAnswerId, id);
+        wrapper.eq(Comment::getParentId, -1);
+
+        wrapper.orderByDesc(Comment::getCreateTime);// 新回答兜底
+
+        commentMapper.selectPage(page, wrapper);
+
+        List<CommentVo> vos =
+                BeanCopyUtils.copyBeanList(page.getRecords(), CommentVo.class);
+
+
+        vos.forEach( vo ->{
+            //TODO 后期优化
+            User user = userService.getById(vo.getUserId());
+            if (user != null){
+                vo.setUsername(user.getUsername());
+                vo.setUserId(user.getId());
+            }
+
+        });
+
+        PageVo pageVo = new PageVo(vos, page.getTotal());
+
+        return pageVo;
+
+    }
 
 
 
