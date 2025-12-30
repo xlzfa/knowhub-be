@@ -8,6 +8,7 @@ import com.xlzfa.knowhub.common.SystemConstants;
 import com.xlzfa.knowhub.dao.AnswerMapper;
 import com.xlzfa.knowhub.dao.CommentMapper;
 import com.xlzfa.knowhub.dao.QuestionMapper;
+import com.xlzfa.knowhub.domain.dto.QuestionAddDto;
 import com.xlzfa.knowhub.domain.pojo.Answer;
 import com.xlzfa.knowhub.domain.pojo.Comment;
 import com.xlzfa.knowhub.domain.pojo.Question;
@@ -190,6 +191,27 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
 
 
 
+
+
+    }
+
+    @Override
+    public ResponseResult addQuestion(QuestionAddDto questionAddDto) {
+
+
+        Question question = Question.builder()
+                .userId(questionAddDto.getUserId())
+                .title(questionAddDto.getTitle())
+                .content(questionAddDto.getContent())
+                .status(SystemConstants.QUESTION_STATUS_NORMAL)
+                .viewCount(0)
+                .likeCount(0)
+                .answerCount(0)
+                .build();
+
+        baseMapper.insert(question);
+
+        return ResponseResult.success();
 
 
     }

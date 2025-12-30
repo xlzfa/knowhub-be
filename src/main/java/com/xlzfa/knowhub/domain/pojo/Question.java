@@ -1,5 +1,9 @@
 package com.xlzfa.knowhub.domain.pojo;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+
 import java.util.Date;
 import java.io.Serializable;
 
@@ -9,6 +13,8 @@ import java.io.Serializable;
  * @author makejava
  * @since 2025-12-13 16:24:20
  */
+
+@Builder
 public class Question implements Serializable {
     private static final long serialVersionUID = -85702478924616603L;
 
@@ -31,6 +37,9 @@ public class Question implements Serializable {
     private Date createTime;
 
     private Date updateTime;
+
+    public Question() {
+    }
 
     public Question(Integer status) {
         this.status = status;
@@ -117,6 +126,8 @@ public class Question implements Serializable {
     public void setUpdateTime(Date updateTime) {
         this.updateTime = updateTime;
     }
+
+
 
 }
 
