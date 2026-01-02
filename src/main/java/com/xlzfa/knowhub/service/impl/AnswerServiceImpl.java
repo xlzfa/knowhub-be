@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xlzfa.knowhub.common.ResponseResult;
 import com.xlzfa.knowhub.common.SystemConstants;
 import com.xlzfa.knowhub.dao.AnswerMapper;
+import com.xlzfa.knowhub.domain.dto.AnswerAddDto;
 import com.xlzfa.knowhub.domain.pojo.Answer;
 import com.xlzfa.knowhub.domain.pojo.Question;
 import com.xlzfa.knowhub.domain.pojo.User;
@@ -101,5 +102,23 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 
         return ResponseResult.success();
 
+    }
+
+    @Override
+    public ResponseResult addAnswer(AnswerAddDto answerAddDto) {
+
+        Answer answer = Answer.builder()
+                .questionId(answerAddDto.getQuestionId())
+                .status(SystemConstants.ANSWER_STATUS_NORMAL)
+                .userId(answerAddDto.getUserId())
+                .content(answerAddDto.getContent())
+                .likeCount(0)
+                .isAccepted(0)
+                .build();
+
+
+        baseMapper.insert(answer);
+
+        return ResponseResult.success();
     }
 }
