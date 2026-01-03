@@ -22,4 +22,13 @@ public class OssServiceImpl implements OssService {
     public ResponseResult uploadAvatar(MultipartFile file) {
         return ResponseResult.success(ossUtil.upload(file,"avatar"));
     }
+
+    @Override
+    public ResponseResult uploadAnswerImg(MultipartFile file) {
+
+        return ResponseResult.success();
+
+
+
+    }
 }

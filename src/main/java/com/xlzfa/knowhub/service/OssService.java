@@ -7,4 +7,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface OssService {
     ResponseResult uploadAvatar(MultipartFile file);
+
+    ResponseResult uploadAnswerImg(MultipartFile file);
 }

@@ -28,6 +28,14 @@ public class UploadController {
 
     }
 
+    @PostMapping("/answer")
+    @Operation( summary = "回答图片")
+    public ResponseResult uploadAnswerImg(@RequestParam("file") MultipartFile file){
+
+        return ossService.uploadAnswerImg(file);
+
+    }
+
 
 
 
