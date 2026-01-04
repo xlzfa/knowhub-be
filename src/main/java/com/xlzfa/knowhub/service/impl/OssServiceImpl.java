@@ -26,9 +26,7 @@ public class OssServiceImpl implements OssService {
     @Override
     public ResponseResult uploadAnswerImg(MultipartFile file) {
 
-        return ResponseResult.success();
-
-
+        return ResponseResult.success(ossUtil.upload(file,"answer"));
 
     }
 }
