@@ -1,5 +1,9 @@
 package com.xlzfa.knowhub.domain.pojo;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+
 import java.util.Date;
 import java.io.Serializable;
 
@@ -9,6 +13,10 @@ import java.io.Serializable;
  * @author makejava
  * @since 2025-12-13 16:24:46
  */
+
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Comment implements Serializable {
     private static final long serialVersionUID = -61252209888740352L;
 
