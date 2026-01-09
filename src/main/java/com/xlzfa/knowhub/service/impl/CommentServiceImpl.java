@@ -26,7 +26,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
         baseMapper.insert(comment);
 
 
-        return ResponseResult.success();
+        return ResponseResult.success(comment.getId());
 
     }
 }

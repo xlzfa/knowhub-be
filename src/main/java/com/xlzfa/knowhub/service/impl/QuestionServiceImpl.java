@@ -211,7 +211,9 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
 
         baseMapper.insert(question);
 
-        return ResponseResult.success();
+
+
+        return ResponseResult.success(question.getId());
 
 
     }

@@ -119,6 +119,6 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 
         baseMapper.insert(answer);
 
-        return ResponseResult.success();
+        return ResponseResult.success(answer.getId());
     }
 }
