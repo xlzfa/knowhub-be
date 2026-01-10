@@ -7,4 +7,6 @@ import com.xlzfa.knowhub.domain.pojo.Comment;
 
 public interface CommentService extends IService<Comment> {
     ResponseResult add(CommentAddDto commentAddDto);
+
+    ResponseResult list(Long answerId);
 }
