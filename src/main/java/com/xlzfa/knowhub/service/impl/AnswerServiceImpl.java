@@ -6,11 +6,14 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xlzfa.knowhub.common.ResponseResult;
 import com.xlzfa.knowhub.common.SystemConstants;
 import com.xlzfa.knowhub.dao.AnswerMapper;
+import com.xlzfa.knowhub.dao.CommentMapper;
 import com.xlzfa.knowhub.domain.dto.AnswerAddDto;
 import com.xlzfa.knowhub.domain.pojo.Answer;
+import com.xlzfa.knowhub.domain.pojo.Comment;
 import com.xlzfa.knowhub.domain.pojo.Question;
 import com.xlzfa.knowhub.domain.pojo.User;
 import com.xlzfa.knowhub.domain.vo.AnswerVo;
+import com.xlzfa.knowhub.domain.vo.CommentVo;
 import com.xlzfa.knowhub.domain.vo.PageVo;
 import com.xlzfa.knowhub.service.AnswerService;
 import com.xlzfa.knowhub.service.QuestionService;
@@ -31,6 +34,8 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
     private QuestionService questionService;
     @Autowired
     private UserService userService;
+    @Autowired
+    private CommentMapper commentMapper;
 
     @Override
     public ResponseResult answerFeed(Integer pageNum, Integer pageSize) {
@@ -74,6 +79,11 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
             if (user != null){
                 vo.setUser(user.getUsername());
             }
+
+            //只返回前三条
+            PageVo<CommentVo> commentPage = commentPage(vo.getId(), 1, 3);
+
+            vo.setComments(commentPage);
 
         });
 
@@ -121,4 +131,46 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 
         return ResponseResult.success(answer.getId());
     }
+
+    public PageVo<CommentVo> commentPage(Long id, Integer pageNum, Integer pageSize){
+
+        if (pageNum == null || pageNum < 1) {
+            pageNum = 1;
+        }
+        if (pageSize == null || pageSize < 1 || pageSize > 50) {
+            pageSize = 10;
+        }
+
+
+        Page<Comment> page = new Page<>(pageNum, pageSize);
+
+        LambdaQueryWrapper<Comment> wrapper = new LambdaQueryWrapper<>();
+
+        wrapper.eq(Comment::getAnswerId, id);
+        wrapper.eq(Comment::getParentId, -1);
+
+        wrapper.orderByDesc(Comment::getCreateTime);// 新回答兜底
+
+        commentMapper.selectPage(page, wrapper);
+
+        List<CommentVo> vos =
+                BeanCopyUtils.copyBeanList(page.getRecords(), CommentVo.class);
+
+
+        vos.forEach( vo ->{
+            //TODO 后期优化
+            User user = userService.getById(vo.getUserId());
+            if (user != null){
+                vo.setUsername(user.getUsername());
+                vo.setUserId(user.getId());
+            }
+
+        });
+
+        PageVo pageVo = new PageVo(vos, page.getTotal());
+
+        return pageVo;
+
+    }
+
 }
