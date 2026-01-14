@@ -36,11 +36,16 @@ public class QuestionController {
         return questionService.updateLike(dto.getId(), dto.getLike());
     }
 
-
     @PostMapping("/add")
     @Operation( summary = "新增问题")
     public ResponseResult addQuestion(@RequestBody QuestionAddDto questionAddDto){
         return questionService.addQuestion(questionAddDto);
+    }
+
+    @GetMapping("/mine")
+    @Operation( summary = "我的问题")
+    public ResponseResult myQuestion(@RequestParam Long userId){
+        return questionService.myQuestion(userId);
     }
 }
 

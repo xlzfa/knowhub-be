@@ -217,4 +217,39 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
 
 
     }
+
+    @Override
+    public ResponseResult myQuestion(Long userId) {
+
+        LambdaQueryWrapper<Question> wrapper = new LambdaQueryWrapper<>();
+
+        wrapper.eq(Question::getUserId, userId)
+                .eq(Question::getStatus, SystemConstants.QUESTION_STATUS_NORMAL)
+                .orderByDesc(Question::getCreateTime);
+
+        List<Question> questions = list(wrapper);
+
+        List<QuestionVo> vos = BeanCopyUtils.copyBeanList(questions, QuestionVo.class);
+
+        // 补充 user 和 answerCount
+        User user = userService.getById(userId);
+
+        vos.forEach(vo -> {
+            if (user != null) {
+                vo.setUser(user.getUsername());
+                vo.setUserId(user.getId());
+            }
+
+            // 装 answerCount（只装数量，不装内容）
+            Long count = answerMapper.selectCount(
+                    new LambdaQueryWrapper<Answer>()
+                            .eq(Answer::getQuestionId, vo.getId())
+                            .eq(Answer::getStatus, SystemConstants.ANSWER_STATUS_NORMAL)
+            );
+
+            vo.setAnswerCount(count);
+        });
+
+        return ResponseResult.success(vos);
+    }
 }
