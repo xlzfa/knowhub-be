@@ -11,4 +11,7 @@ public interface AnswerService extends IService<Answer> {
     ResponseResult updateLike(Long id, boolean like);
 
     ResponseResult addAnswer(AnswerAddDto answerAddDto);
+
+    ResponseResult myAnswer(Long userId);
+
 }

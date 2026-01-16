@@ -132,6 +132,44 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
         return ResponseResult.success(answer.getId());
     }
 
+    @Override
+    public ResponseResult myAnswer(Long userId) {
+
+        LambdaQueryWrapper<Answer> wrapper = new LambdaQueryWrapper<>();
+
+        wrapper.eq(Answer::getUserId, userId)
+                .eq(Answer::getStatus,SystemConstants.ANSWER_STATUS_NORMAL)
+                .orderByDesc(Answer::getCreateTime);
+
+        List<Answer> answers = list(wrapper);
+
+        List<AnswerVo> vos = BeanCopyUtils.copyBeanList(answers, AnswerVo.class);
+
+        vos.forEach( vo ->{
+            //TODO 后期优化
+            Question question = questionService.getById(vo.getQuestionId());
+            if (question != null){
+                vo.setQuertionTitle(question.getTitle());
+            }
+
+        });
+
+        User user = userService.getById(userId);
+
+        vos.forEach( vo ->{
+            //TODO 后期优化
+            if (user != null){
+                vo.setUser(user.getUsername());
+            }
+
+        });
+
+        return ResponseResult.success(vos);
+
+
+
+    }
+
     public PageVo<CommentVo> commentPage(Long id, Integer pageNum, Integer pageSize){
 
         if (pageNum == null || pageNum < 1) {
@@ -172,5 +210,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
         return pageVo;
 
     }
+
+
 
 }

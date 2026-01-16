@@ -37,4 +37,10 @@ public class AnswerController {
         return answerService.addAnswer(answerAddDto);
     }
 
+    @GetMapping("/mine")
+    @Operation( summary = "我的回答")
+    public ResponseResult myAnswer(@RequestParam Long userId){
+        return answerService.myAnswer(userId);
+    }
+
 }
