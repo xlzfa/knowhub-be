@@ -9,4 +9,6 @@ public interface CommentService extends IService<Comment> {
     ResponseResult add(CommentAddDto commentAddDto);
 
     ResponseResult list(Long answerId);
+
+    ResponseResult myComment(Long userId);
 }

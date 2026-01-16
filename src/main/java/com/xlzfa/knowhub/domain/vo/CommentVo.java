@@ -46,4 +46,15 @@ public class CommentVo {
      * 创建时间
      */
     private LocalDateTime createTime;
+
+
+    //为个人评论而添加
+    private String questionTitle;
+
+    private Long questionId;
+
+    private Long answerUserId;
+
+    private String answerUsername;
+
 }

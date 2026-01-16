@@ -31,4 +31,10 @@ public class CommentController {
     }
 
 
+    @GetMapping("/mine")
+    @Operation( summary = "我的评论")
+    public ResponseResult myComment(@RequestParam Long userId){
+        return commentService.myComment(userId);
+    }
+
 }
