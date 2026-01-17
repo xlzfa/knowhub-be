@@ -110,8 +110,8 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
             if (answer != null){
                 vo.setAnswerUsername(getAnswerUsername(answerId));
                 vo.setAnswerUserId(getAnswerUserId(answerId));
-                vo.setQuestionTitle(getQuestionTitle(userId));
-                vo.setQuestionId(getQuestionId(userId));
+                vo.setQuestionTitle(getQuestionTitle(answerId));
+                vo.setQuestionId(getQuestionId(answerId));
             }
         });
 
