@@ -43,7 +43,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
 
         QuestionVo questionVo = BeanCopyUtils.copyBean(question, QuestionVo.class);
 
-        questionVo.setUser(userService.getById(id).getUsername());
+        questionVo.setUser(userService.getById(question.getUserId()).getUsername());
 
         //TODO 先写死5，以后改answer
         questionVo.setAnswerCount(5L);
@@ -164,7 +164,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
 
         QuestionVo questionVo = BeanCopyUtils.copyBean(question, QuestionVo.class);
 
-        questionVo.setUser(userService.getById(id).getUsername());
+        questionVo.setUser(userService.getById(question.getUserId()).getUsername());
 
         return ResponseResult.success(questionVo);
     }
