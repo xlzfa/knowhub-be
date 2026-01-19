@@ -46,7 +46,13 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         questionVo.setUser(userService.getById(question.getUserId()).getUsername());
 
         //TODO 先写死5，以后改answer
-        questionVo.setAnswerCount(5L);
+
+        long count = answerMapper.selectCount(
+                new LambdaQueryWrapper<Answer>()
+                        .eq(Answer::getQuestionId, 1)
+        );
+
+        questionVo.setAnswerCount(count);
 
         QuestionDetailVo questionDetailVo = QuestionDetailVo.builder()
                 .question(questionVo)
