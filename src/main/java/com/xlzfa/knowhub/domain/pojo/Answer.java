@@ -31,7 +31,7 @@ public class Answer implements Serializable {
 
     private String content;
 
-    private Integer likeCount;
+    private Long likeCount;
 
     private Integer isAccepted;
 
@@ -78,11 +78,11 @@ public class Answer implements Serializable {
         this.content = content;
     }
 
-    public Integer getLikeCount() {
+    public Long getLikeCount() {
         return likeCount;
     }
 
-    public void setLikeCount(Integer likeCount) {
+    public void setLikeCount(Long likeCount) {
         this.likeCount = likeCount;
     }
 

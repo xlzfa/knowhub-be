@@ -28,9 +28,9 @@ public class QuestionVo {
 
     private String content;
 
-    private Integer likeCount;
+    private Long likeCount;
 
-    private Integer viewCount;
+    private Long viewCount;
 
     private Date createTime;
 

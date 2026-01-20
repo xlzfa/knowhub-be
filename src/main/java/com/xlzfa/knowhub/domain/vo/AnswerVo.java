@@ -30,7 +30,7 @@ public class AnswerVo {
 
     private String content;
 
-    private Integer likeCount;
+    private Long likeCount;
 
     private Integer isAccepted;
 

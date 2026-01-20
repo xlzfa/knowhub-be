@@ -29,11 +29,11 @@ public class Question implements Serializable {
 
     private String content;
 
-    private Integer viewCount;
+    private Long viewCount;
 
-    private Integer likeCount;
+    private Long likeCount;
 
-    private Integer answerCount;
+    private Long answerCount;
 
     private Date createTime;
 
@@ -86,29 +86,29 @@ public class Question implements Serializable {
         this.content = content;
     }
 
-    public Integer getViewCount() {
+    public Long getViewCount() {
         return viewCount;
     }
 
 
 
-    public void setViewCount(Integer viewCount) {
+    public void setViewCount(Long viewCount) {
         this.viewCount = viewCount;
     }
 
-    public Integer getLikeCount() {
+    public Long getLikeCount() {
         return likeCount;
     }
 
-    public void setLikeCount(Integer likeCount) {
+    public void setLikeCount(Long likeCount) {
         this.likeCount = likeCount;
     }
 
-    public Integer getAnswerCount() {
+    public Long getAnswerCount() {
         return answerCount;
     }
 
-    public void setAnswerCount(Integer answerCount) {
+    public void setAnswerCount(Long answerCount) {
         this.answerCount = answerCount;
     }
 

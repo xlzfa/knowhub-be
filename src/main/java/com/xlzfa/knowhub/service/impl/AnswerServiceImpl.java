@@ -14,6 +14,7 @@ import com.xlzfa.knowhub.domain.pojo.Question;
 import com.xlzfa.knowhub.domain.pojo.User;
 import com.xlzfa.knowhub.domain.vo.AnswerVo;
 import com.xlzfa.knowhub.domain.vo.CommentVo;
+import com.xlzfa.knowhub.domain.vo.LikeVo;
 import com.xlzfa.knowhub.domain.vo.PageVo;
 import com.xlzfa.knowhub.service.AnswerService;
 import com.xlzfa.knowhub.service.QuestionService;
@@ -110,7 +111,12 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
                     .update();
         }
 
-        return ResponseResult.success();
+        LikeVo likeVo = LikeVo.builder()
+                .liked(like)
+                .likeCount(baseMapper.selectById(id).getLikeCount())
+                .build();
+
+        return ResponseResult.success(likeVo);
 
     }
 
@@ -122,7 +128,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
                 .status(SystemConstants.ANSWER_STATUS_NORMAL)
                 .userId(answerAddDto.getUserId())
                 .content(answerAddDto.getContent())
-                .likeCount(0)
+                .likeCount(0L)
                 .isAccepted(0)
                 .build();
 

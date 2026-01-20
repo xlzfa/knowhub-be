@@ -45,7 +45,6 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
 
         questionVo.setUser(userService.getById(question.getUserId()).getUsername());
 
-        //TODO 先写死5，以后改answer
 
         long count = answerMapper.selectCount(
                 new LambdaQueryWrapper<Answer>()
@@ -193,7 +192,12 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
                     .update();
         }
 
-        return ResponseResult.success();
+        LikeVo likeVo = LikeVo.builder()
+                .liked(like)
+                .likeCount(baseMapper.selectById(id).getLikeCount())
+                .build();
+
+        return ResponseResult.success(likeVo);
 
 
 
@@ -210,9 +214,9 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
                 .title(questionAddDto.getTitle())
                 .content(questionAddDto.getContent())
                 .status(SystemConstants.QUESTION_STATUS_NORMAL)
-                .viewCount(0)
-                .likeCount(0)
-                .answerCount(0)
+                .viewCount(0L)
+                .likeCount(0L)
+                .answerCount(0L)
                 .build();
 
         baseMapper.insert(question);
