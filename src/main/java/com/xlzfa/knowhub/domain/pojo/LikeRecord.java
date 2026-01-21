@@ -22,6 +22,8 @@ public class LikeRecord implements Serializable {
 
     private Date createTime;
 
+    private Date updateTime;
+
 
     public Long getId() {
         return id;
@@ -63,5 +65,12 @@ public class LikeRecord implements Serializable {
         this.createTime = createTime;
     }
 
+    public Date getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Date updateTime) {
+        this.updateTime = updateTime;
+    }
 }
 
