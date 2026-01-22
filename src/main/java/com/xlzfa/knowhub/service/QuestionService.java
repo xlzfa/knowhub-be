@@ -10,7 +10,7 @@ public interface QuestionService extends IService<Question> {
 
     ResponseResult questionInfo(Long id);
 
-    ResponseResult updateLike(Long id, Boolean like);
+    ResponseResult updateLike(Long id, boolean like);
 
     ResponseResult addQuestion(QuestionAddDto questionAddDto);
 

@@ -7,11 +7,9 @@ import com.xlzfa.knowhub.common.ResponseResult;
 import com.xlzfa.knowhub.common.SystemConstants;
 import com.xlzfa.knowhub.dao.AnswerMapper;
 import com.xlzfa.knowhub.dao.CommentMapper;
+import com.xlzfa.knowhub.dao.LikeRecordMapper;
 import com.xlzfa.knowhub.domain.dto.AnswerAddDto;
-import com.xlzfa.knowhub.domain.pojo.Answer;
-import com.xlzfa.knowhub.domain.pojo.Comment;
-import com.xlzfa.knowhub.domain.pojo.Question;
-import com.xlzfa.knowhub.domain.pojo.User;
+import com.xlzfa.knowhub.domain.pojo.*;
 import com.xlzfa.knowhub.domain.vo.AnswerVo;
 import com.xlzfa.knowhub.domain.vo.CommentVo;
 import com.xlzfa.knowhub.domain.vo.LikeVo;
@@ -19,6 +17,7 @@ import com.xlzfa.knowhub.domain.vo.PageVo;
 import com.xlzfa.knowhub.service.AnswerService;
 import com.xlzfa.knowhub.service.QuestionService;
 import com.xlzfa.knowhub.service.UserService;
+import com.xlzfa.knowhub.util.BaseContext;
 import com.xlzfa.knowhub.util.BeanCopyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,6 +36,8 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
     private UserService userService;
     @Autowired
     private CommentMapper commentMapper;
+    @Autowired
+    private LikeRecordMapper likeRecordMapper;
 
     @Override
     public ResponseResult answerFeed(Integer pageNum, Integer pageSize) {
@@ -96,27 +97,66 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 
     @Override
     public ResponseResult updateLike(Long id, boolean like) {
+
         //TODO 后期先装redis，定时写入mysql
 
+        Long userId = BaseContext.getCurrentId();
 
+        //如果是要点赞
         if (like){
-            this.lambdaUpdate()
-                    .setSql("like_count = like_count + 1")
-                    .eq(Answer::getId, id)
-                    .update();
+
+            Long islike = findLikeRecord(userId, id);
+
+            if (islike > 0L){
+                likeRecordMapper.deleteById(islike);
+            }else {
+                LikeRecord newlike = LikeRecord.builder()
+                        .userId(userId)
+                        .targetType(1)
+                        .targetId(id)
+                        .build();
+                likeRecordMapper.insert(newlike);
+            }
+
+
         }else {
-            this.lambdaUpdate()
-                    .setSql("like_count = IF(like_count > 0, like_count - 1, 0)")
-                    .eq(Answer::getId, id)
-                    .update();
+
+            Long islike = findLikeRecord(userId, id);
+
+            if (islike == 0L){
+                LikeRecord newlike = LikeRecord.builder()
+                        .userId(userId)
+                        .targetType(1)
+                        .targetId(id)
+                        .build();
+                likeRecordMapper.insert(newlike);
+            }else {
+                likeRecordMapper.deleteById(islike);
+            }
+
+
         }
 
-        LikeVo likeVo = LikeVo.builder()
-                .liked(like)
-                .likeCount(baseMapper.selectById(id).getLikeCount())
-                .build();
+        return ResponseResult.success();
 
-        return ResponseResult.success(likeVo);
+
+    }
+
+    public Long findLikeRecord(Long userId, Long answerId){
+
+        LambdaQueryWrapper<LikeRecord> wrapper = new LambdaQueryWrapper<>();
+
+        wrapper.eq(LikeRecord::getTargetType, 0)
+                .eq(LikeRecord::getUserId, userId)
+                .eq(LikeRecord::getTargetId, answerId);
+
+        if (likeRecordMapper.selectOne(wrapper) != null){
+            return likeRecordMapper.selectOne(wrapper).getId();
+        }else {
+            return 0L;
+        }
+
+
 
     }
 
