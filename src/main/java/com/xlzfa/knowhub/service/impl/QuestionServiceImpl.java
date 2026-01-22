@@ -179,25 +179,35 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
 
         //TODO 后期先装redis，定时写入mysql
 
-
+        //如果是要点赞
         if (like){
-            this.lambdaUpdate()
-                    .setSql("like_count = like_count + 1")
-                    .eq(Question::getId, id)
-                    .update();
-        }else {
-            this.lambdaUpdate()
-                    .setSql("like_count = IF(like_count > 0, like_count - 1, 0)")
-                    .eq(Question::getId, id)
-                    .update();
+
+
+
+
+
         }
 
-        LikeVo likeVo = LikeVo.builder()
-                .liked(like)
-                .likeCount(baseMapper.selectById(id).getLikeCount())
-                .build();
 
-        return ResponseResult.success(likeVo);
+
+//        if (like){
+//            this.lambdaUpdate()
+//                    .setSql("like_count = like_count + 1")
+//                    .eq(Question::getId, id)
+//                    .update();
+//        }else {
+//            this.lambdaUpdate()
+//                    .setSql("like_count = IF(like_count > 0, like_count - 1, 0)")
+//                    .eq(Question::getId, id)
+//                    .update();
+//        }
+//
+//        LikeVo likeVo = LikeVo.builder()
+//                .liked(like)
+//                .likeCount(baseMapper.selectById(id).getLikeCount())
+//                .build();
+//
+//        return ResponseResult.success(likeVo);
 
 
 
