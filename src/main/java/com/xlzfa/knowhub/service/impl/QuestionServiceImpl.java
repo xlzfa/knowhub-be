@@ -21,6 +21,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> implements QuestionService {
@@ -54,6 +57,17 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         );
 
         questionVo.setAnswerCount(count);
+
+        LambdaQueryWrapper<LikeRecord> eq = new LambdaQueryWrapper<LikeRecord>()
+                .eq(LikeRecord::getUserId, BaseContext.getCurrentId())
+                .eq(LikeRecord::getTargetType, 0)
+                .eq(LikeRecord::getTargetId, id);
+
+        if (eq == null) {
+            questionVo.setLiked(false);
+        }else {
+            questionVo.setLiked(true);
+        }
 
         QuestionDetailVo questionDetailVo = QuestionDetailVo.builder()
                 .question(questionVo)
@@ -93,25 +107,69 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         List<AnswerVo> vos =
                 BeanCopyUtils.copyBeanList(page.getRecords(), AnswerVo.class);
 
+        //优化：解决N+1
 
-        vos.forEach( vo ->{
-            //TODO 后期优化
-            User user = userService.getById(vo.getUserId());
-            if (user != null){
-                vo.setUser(user.getUsername());
-                vo.setUserId(user.getId());
-            }
+        //查用户名
+        Set<Long> userIds = vos.stream()
+                .map(AnswerVo::getUserId)
+                .collect(Collectors.toSet());
+
+        List<User> users = userService.listByIds(userIds);
+
+        Map<Long, User> userMap = users.stream()
+                .collect(Collectors.toMap(User::getId, u -> u));
+
+        //查是否点赞过
+        List<LikeRecord> likeRecords = likeRecordMapper.selectList(
+                new LambdaQueryWrapper<LikeRecord>()
+                        .eq(LikeRecord::getUserId, BaseContext.getCurrentId())
+                        .eq(LikeRecord::getTargetType, 1)
+        );
+
+        Set<Long> likedAnswerIds = likeRecords.stream()
+                .map(LikeRecord::getTargetId)
+                .collect(Collectors.toSet());
+
+
+        //遍历装载
+        for (AnswerVo vo : vos){
+
+            User user = userMap.get(vo.getUserId());
+            vo.setUser(user != null ? user.getUsername() : "匿名");
+            vo.setLiked(likedAnswerIds.contains(vo.getId()));
+
             //只返回前三条
             PageVo<CommentVo> commentPage = commentPage(vo.getId(), 1, 3);
 
             vo.setComments(commentPage);
+        }
 
 
-        });
+//        vos.forEach( vo ->{
+//            User user = userService.getById(vo.getUserId());
+//            if (user != null){
+//
+//                vo.setUser(user.getUsername());
+//
+//                LambdaQueryWrapper<LikeRecord> eq = new LambdaQueryWrapper<LikeRecord>()
+//                        .eq(LikeRecord::getUserId, BaseContext.getCurrentId())
+//                        .eq(LikeRecord::getTargetType, 1)
+//                        .eq(LikeRecord::getTargetId, vo.getId());
+//
+//                if (eq == null) {
+//                    vo.setLiked(false);
+//                }else {
+//                    vo.setLiked(true);
+//                }
+//
+//            }
+//
+//
+//        });
 
-        vos.forEach( vo ->{
-            System.out.println(vo.getComments().getRows().toString());
-        });
+//        vos.forEach( vo ->{
+//            System.out.println(vo.getComments().getRows().toString());
+//        });
 
         PageVo pageVo = new PageVo(vos, page.getTotal());
 

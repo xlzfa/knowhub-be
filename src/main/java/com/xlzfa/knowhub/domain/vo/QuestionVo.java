@@ -32,6 +32,8 @@ public class QuestionVo {
 
     private Long viewCount;
 
+    private boolean liked;
+
     private Date createTime;
 
 

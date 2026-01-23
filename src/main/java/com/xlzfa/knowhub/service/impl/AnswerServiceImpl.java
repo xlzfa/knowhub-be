@@ -175,7 +175,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 
         LambdaQueryWrapper<LikeRecord> wrapper = new LambdaQueryWrapper<>();
 
-        wrapper.eq(LikeRecord::getTargetType, 0)
+        wrapper.eq(LikeRecord::getTargetType, 1)
                 .eq(LikeRecord::getUserId, userId)
                 .eq(LikeRecord::getTargetId, answerId);
 

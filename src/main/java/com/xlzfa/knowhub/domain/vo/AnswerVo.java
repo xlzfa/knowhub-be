@@ -34,6 +34,8 @@ public class AnswerVo {
 
     private Integer isAccepted;
 
+    private boolean liked;
+
     private Date createTime;
 
 }
