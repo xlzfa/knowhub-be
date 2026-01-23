@@ -102,19 +102,34 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 
         Long userId = BaseContext.getCurrentId();
 
+        boolean res = true;
+
         //如果是要点赞
         if (like){
 
             Long islike = findLikeRecord(userId, id);
 
             if (islike > 0L){
+
+                this.lambdaUpdate()
+                        .setSql("like_count = IF(like_count > 0, like_count - 1, 0)")
+                        .eq(Answer::getId, id)
+                        .update();
+
                 likeRecordMapper.deleteById(islike);
+                res = false;
             }else {
+                this.lambdaUpdate()
+                        .setSql("like_count = like_count + 1")
+                        .eq(Answer::getId, id)
+                        .update();
+
                 LikeRecord newlike = LikeRecord.builder()
                         .userId(userId)
                         .targetType(1)
                         .targetId(id)
                         .build();
+
                 likeRecordMapper.insert(newlike);
             }
 
@@ -124,20 +139,34 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
             Long islike = findLikeRecord(userId, id);
 
             if (islike == 0L){
+
+                this.lambdaUpdate()
+                        .setSql("like_count = like_count + 1")
+                        .eq(Answer::getId, id)
+                        .update();
+
                 LikeRecord newlike = LikeRecord.builder()
                         .userId(userId)
                         .targetType(1)
                         .targetId(id)
                         .build();
+
                 likeRecordMapper.insert(newlike);
             }else {
+
+                this.lambdaUpdate()
+                        .setSql("like_count = IF(like_count > 0, like_count - 1, 0)")
+                        .eq(Answer::getId, id)
+                        .update();
+
                 likeRecordMapper.deleteById(islike);
+                res = false;
             }
 
 
         }
 
-        return ResponseResult.success();
+        return ResponseResult.success(res);
 
 
     }

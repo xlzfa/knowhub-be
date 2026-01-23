@@ -183,19 +183,37 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
 
         Long userId = BaseContext.getCurrentId();
 
+        boolean res = true;
+
         //如果是要点赞
         if (like){
 
             Long islike = findLikeRecord(userId, id);
 
+
+
             if (islike > 0L){
+
+                this.lambdaUpdate()
+                    .setSql("like_count = IF(like_count > 0, like_count - 1, 0)")
+                    .eq(Question::getId, id)
+                    .update();
+
                 likeRecordMapper.deleteById(islike);
+
+                res = false;
             }else {
+                this.lambdaUpdate()
+                    .setSql("like_count = like_count + 1")
+                    .eq(Question::getId, id)
+                    .update();
+
                 LikeRecord newlike = LikeRecord.builder()
                         .userId(userId)
                         .targetType(0)
                         .targetId(id)
                         .build();
+
                 likeRecordMapper.insert(newlike);
             }
 
@@ -205,40 +223,35 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
             Long islike = findLikeRecord(userId, id);
 
             if (islike == 0L){
+
+                this.lambdaUpdate()
+                        .setSql("like_count = like_count + 1")
+                        .eq(Question::getId, id)
+                        .update();
+
                 LikeRecord newlike = LikeRecord.builder()
                         .userId(userId)
                         .targetType(0)
                         .targetId(id)
                         .build();
+
                 likeRecordMapper.insert(newlike);
             }else {
+
+                this.lambdaUpdate()
+                        .setSql("like_count = IF(like_count > 0, like_count - 1, 0)")
+                        .eq(Question::getId, id)
+                        .update();
+
                 likeRecordMapper.deleteById(islike);
+
+                res = false;
             }
 
 
         }
 
-        return ResponseResult.success();
-
-//        if (like){
-//            this.lambdaUpdate()
-//                    .setSql("like_count = like_count + 1")
-//                    .eq(Question::getId, id)
-//                    .update();
-//        }else {
-//            this.lambdaUpdate()
-//                    .setSql("like_count = IF(like_count > 0, like_count - 1, 0)")
-//                    .eq(Question::getId, id)
-//                    .update();
-//        }
-//
-//        LikeVo likeVo = LikeVo.builder()
-//                .liked(like)
-//                .likeCount(baseMapper.selectById(id).getLikeCount())
-//                .build();
-//
-//        return ResponseResult.success(likeVo);
-
+        return ResponseResult.success(res);
 
 
     }
