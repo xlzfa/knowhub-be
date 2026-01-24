@@ -20,6 +20,7 @@ import com.xlzfa.knowhub.util.BeanCopyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -51,23 +52,15 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         questionVo.setUser(userService.getById(question.getUserId()).getUsername());
 
 
-        long count = answerMapper.selectCount(
-                new LambdaQueryWrapper<Answer>()
-                        .eq(Answer::getQuestionId, 1)
+        boolean liked = likeRecordMapper.exists(
+                new LambdaQueryWrapper<LikeRecord>()
+                        .eq(LikeRecord::getUserId, BaseContext.getCurrentId())
+                        .eq(LikeRecord::getTargetType, 0)
+                        .eq(LikeRecord::getTargetId, id)
         );
 
-        questionVo.setAnswerCount(count);
+        questionVo.setLiked(liked);
 
-        LambdaQueryWrapper<LikeRecord> eq = new LambdaQueryWrapper<LikeRecord>()
-                .eq(LikeRecord::getUserId, BaseContext.getCurrentId())
-                .eq(LikeRecord::getTargetType, 0)
-                .eq(LikeRecord::getTargetId, id);
-
-        if (eq == null) {
-            questionVo.setLiked(false);
-        }else {
-            questionVo.setLiked(true);
-        }
 
         QuestionDetailVo questionDetailVo = QuestionDetailVo.builder()
                 .question(questionVo)
@@ -130,6 +123,46 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
                 .map(LikeRecord::getTargetId)
                 .collect(Collectors.toSet());
 
+        //查所有评论
+
+        List<Long> answerIds = vos.stream()
+                .map(AnswerVo::getId)
+                .collect(Collectors.toList());
+
+        List<Comment> comments = commentMapper.selectList(
+                new LambdaQueryWrapper<Comment>()
+                        .in(Comment::getAnswerId, answerIds)
+                        .orderByDesc(Comment::getCreateTime)
+        );
+
+        Set<Long> commentUserIds = comments.stream()
+                .map(Comment::getUserId)
+                .collect(Collectors.toSet());
+
+        List<User> commentUsers = userService.listByIds(commentUserIds);
+
+        Map<Long, User> commentUserMap = commentUsers.stream()
+                .collect(Collectors.toMap(User::getId, u -> u));
+
+
+
+        Map<Long, List<CommentVo>> commentMap = comments.stream()
+                .map(c -> {
+                    CommentVo vo = BeanCopyUtils.copyBean(c, CommentVo.class);
+                    User user = commentUserMap.get(c.getUserId());
+                    vo.setUsername(user != null ? user.getUsername() : "匿名");
+                    return vo;
+                })
+                .collect(Collectors.groupingBy(
+                        CommentVo::getAnswerId,
+                        Collectors.collectingAndThen(
+                                Collectors.toList(),
+                                list -> list.stream().limit(3).collect(Collectors.toList())
+                        )
+                ));
+
+
+
 
         //遍历装载
         for (AnswerVo vo : vos){
@@ -138,38 +171,18 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
             vo.setUser(user != null ? user.getUsername() : "匿名");
             vo.setLiked(likedAnswerIds.contains(vo.getId()));
 
-            //只返回前三条
-            PageVo<CommentVo> commentPage = commentPage(vo.getId(), 1, 3);
+            List<CommentVo> commentVos = commentMap.getOrDefault(vo.getId(), Collections.emptyList());
 
-            vo.setComments(commentPage);
+            vo.setComments(new PageVo<>(
+                    commentVos,
+                    Long.valueOf(commentVos.size())));
+
+            //只返回前三条
+//            PageVo<CommentVo> commentPage = commentPage(vo.getId(), 1, 3);
+//
+//            vo.setComments(commentPage);
         }
 
-
-//        vos.forEach( vo ->{
-//            User user = userService.getById(vo.getUserId());
-//            if (user != null){
-//
-//                vo.setUser(user.getUsername());
-//
-//                LambdaQueryWrapper<LikeRecord> eq = new LambdaQueryWrapper<LikeRecord>()
-//                        .eq(LikeRecord::getUserId, BaseContext.getCurrentId())
-//                        .eq(LikeRecord::getTargetType, 1)
-//                        .eq(LikeRecord::getTargetId, vo.getId());
-//
-//                if (eq == null) {
-//                    vo.setLiked(false);
-//                }else {
-//                    vo.setLiked(true);
-//                }
-//
-//            }
-//
-//
-//        });
-
-//        vos.forEach( vo ->{
-//            System.out.println(vo.getComments().getRows().toString());
-//        });
 
         PageVo pageVo = new PageVo(vos, page.getTotal());
 
@@ -203,12 +216,26 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
                 BeanCopyUtils.copyBeanList(page.getRecords(), CommentVo.class);
 
 
+
+        //优化：解决N+1
+
+        //查用户名
+        Set<Long> userIds = vos.stream()
+                .map(CommentVo::getUserId)
+                .collect(Collectors.toSet());
+
+        List<User> users = userService.listByIds(userIds);
+
+        Map<Long, User> userMap = users.stream()
+                .collect(Collectors.toMap(User::getId, u -> u));
+
+
         vos.forEach( vo ->{
-            //TODO 后期优化
-            User user = userService.getById(vo.getUserId());
+
+            User user = userMap.get(vo.getUserId());
+
             if (user != null){
-                vo.setUsername(user.getUsername());
-                vo.setUserId(user.getId());
+                vo.setUsername(user != null ? user.getUsername() : "匿名");
             }
 
         });
@@ -375,23 +402,18 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
 
         List<QuestionVo> vos = BeanCopyUtils.copyBeanList(questions, QuestionVo.class);
 
-        // 补充 user 和 answerCount
+        // 补充 user
         User user = userService.getById(userId);
 
+
+
         vos.forEach(vo -> {
+
             if (user != null) {
                 vo.setUser(user.getUsername());
                 vo.setUserId(user.getId());
             }
 
-            // 装 answerCount（只装数量，不装内容）
-            Long count = answerMapper.selectCount(
-                    new LambdaQueryWrapper<Answer>()
-                            .eq(Answer::getQuestionId, vo.getId())
-                            .eq(Answer::getStatus, SystemConstants.ANSWER_STATUS_NORMAL)
-            );
-
-            vo.setAnswerCount(count);
         });
 
         return ResponseResult.success(vos);
