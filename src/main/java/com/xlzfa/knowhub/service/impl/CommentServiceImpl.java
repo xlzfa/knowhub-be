@@ -23,6 +23,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -72,13 +75,26 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
                 BeanCopyUtils.copyBeanList(list, CommentVo.class);
 
 
+        //查用户名
+        Set<Long> userIds = vos.stream()
+                .map(CommentVo::getUserId)
+                .collect(Collectors.toSet());
+
+        List<User> users = userService.listByIds(userIds);
+
+        Map<Long, User> userMap = users.stream()
+                .collect(Collectors.toMap(User::getId, u -> u));
+
+
         vos.forEach( vo ->{
-            //TODO 后期优化
-            User user = userService.getById(vo.getUserId());
+
+
+            User user = userMap.get(vo.getUserId());
+
             if (user != null){
-                vo.setUsername(user.getUsername());
-                vo.setUserId(user.getId());
+                vo.setUsername(user != null ? user.getUsername() : "匿名");
             }
+
         });
 
         return ResponseResult.success(vos);

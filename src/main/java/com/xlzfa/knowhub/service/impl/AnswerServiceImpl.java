@@ -162,6 +162,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
         for (AnswerVo vo : vos) {
 
             User user = userMap.get(vo.getUserId());
+
             vo.setUser(user != null ? user.getUsername() : "匿名");
 
             vo.setLiked(likedAnswerIds.contains(vo.getId()));
@@ -312,19 +313,24 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 
         List<AnswerVo> vos = BeanCopyUtils.copyBeanList(answers, AnswerVo.class);
 
-        vos.forEach( vo ->{
-            //TODO 后期优化
-            Question question = questionService.getById(vo.getQuestionId());
-            if (question != null){
-                vo.setQuertionTitle(question.getTitle());
-            }
+        //查问题标题
+        Set<Long> questionIds = vos.stream()
+                .map(AnswerVo::getQuestionId)
+                .collect(Collectors.toSet());
 
-        });
+        List<Question> questions = questionService.listByIds(questionIds);
+
+        Map<Long, String> questionTitlesMap = questions.stream()
+                .collect(Collectors.toMap(Question::getId, q -> q.getTitle()));
+
+
 
         User user = userService.getById(userId);
 
         vos.forEach( vo ->{
-            //TODO 后期优化
+
+            vo.setQuertionTitle(questionTitlesMap.get(vo.getQuestionId()));
+
             if (user != null){
                 vo.setUser(user.getUsername());
             }
@@ -362,12 +368,24 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
                 BeanCopyUtils.copyBeanList(page.getRecords(), CommentVo.class);
 
 
+        //查用户名
+        Set<Long> userIds = vos.stream()
+                .map(CommentVo::getUserId)
+                .collect(Collectors.toSet());
+
+        List<User> users = userService.listByIds(userIds);
+
+        Map<Long, User> userMap = users.stream()
+                .collect(Collectors.toMap(User::getId, u -> u));
+
+
         vos.forEach( vo ->{
-            //TODO 后期优化
-            User user = userService.getById(vo.getUserId());
+
+
+            User user = userMap.get(vo.getUserId());
+
             if (user != null){
-                vo.setUsername(user.getUsername());
-                vo.setUserId(user.getId());
+                vo.setUsername(user != null ? user.getUsername() : "匿名");
             }
 
         });
