@@ -268,7 +268,13 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
 
         Long userId = BaseContext.getCurrentId();
 
-        boolean res = true;
+        LikeVo likeVo = new LikeVo();
+
+        likeVo.setLiked(true);
+
+        Question question = baseMapper.selectById(id);
+
+        Long likeCount = question.getLikeCount();
 
         //如果是要点赞
         if (like){
@@ -284,9 +290,11 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
                     .eq(Question::getId, id)
                     .update();
 
+                likeCount--;
+
                 likeRecordMapper.deleteById(islike);
 
-                res = false;
+                likeVo.setLiked(false);
             }else {
                 this.lambdaUpdate()
                     .setSql("like_count = like_count + 1")
@@ -298,6 +306,8 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
                         .targetType(0)
                         .targetId(id)
                         .build();
+
+                likeCount++;
 
                 likeRecordMapper.insert(newlike);
             }
@@ -320,6 +330,8 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
                         .targetId(id)
                         .build();
 
+                likeCount++;
+
                 likeRecordMapper.insert(newlike);
             }else {
 
@@ -328,15 +340,20 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
                         .eq(Question::getId, id)
                         .update();
 
+                likeCount--;
+
                 likeRecordMapper.deleteById(islike);
 
-                res = false;
+                likeVo.setLiked(false);
+
             }
 
 
         }
 
-        return ResponseResult.success(res);
+        likeVo.setLikeCount(likeCount);
+
+        return ResponseResult.success(likeVo);
 
 
     }

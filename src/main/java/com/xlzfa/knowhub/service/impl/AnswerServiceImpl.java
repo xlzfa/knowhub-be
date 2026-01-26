@@ -95,6 +95,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
         Map<Long, User> userMap = users.stream()
                 .collect(Collectors.toMap(User::getId, u -> u));
 
+
         //查是否点赞过
         List<LikeRecord> likeRecords = likeRecordMapper.selectList(
                 new LambdaQueryWrapper<LikeRecord>()
@@ -190,7 +191,13 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 
         Long userId = BaseContext.getCurrentId();
 
-        boolean res = true;
+        LikeVo likeVo = new LikeVo();
+
+        likeVo.setLiked(true);
+
+        Answer answer = baseMapper.selectById(id);
+
+        Long likeCount = answer.getLikeCount();
 
         //如果是要点赞
         if (like){
@@ -204,8 +211,10 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
                         .eq(Answer::getId, id)
                         .update();
 
+                likeCount--;
+
                 likeRecordMapper.deleteById(islike);
-                res = false;
+                likeVo.setLiked(false);
             }else {
                 this.lambdaUpdate()
                         .setSql("like_count = like_count + 1")
@@ -217,6 +226,8 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
                         .targetType(1)
                         .targetId(id)
                         .build();
+
+                likeCount++;
 
                 likeRecordMapper.insert(newlike);
             }
@@ -239,6 +250,8 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
                         .targetId(id)
                         .build();
 
+                likeCount++;
+
                 likeRecordMapper.insert(newlike);
             }else {
 
@@ -247,14 +260,18 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
                         .eq(Answer::getId, id)
                         .update();
 
+                likeCount--;
+
                 likeRecordMapper.deleteById(islike);
-                res = false;
+                likeVo.setLiked(false);
             }
 
 
         }
 
-        return ResponseResult.success(res);
+        likeVo.setLikeCount(likeCount);
+
+        return ResponseResult.success(likeVo);
 
 
     }

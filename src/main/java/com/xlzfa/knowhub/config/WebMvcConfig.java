@@ -20,8 +20,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .addPathPatterns("/**")       // 拦截所有请求
                 .excludePathPatterns("/user/login",
                         "/v3/api-docs/**",
-                        "/swagger-ui/**",
-                        "/answer/feed");
+                        "/swagger-ui/**");
 
     }
 
