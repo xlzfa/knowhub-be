@@ -24,6 +24,8 @@ import com.xlzfa.knowhub.util.BaseContext;
 import com.xlzfa.knowhub.util.BeanCopyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
+
 
 import java.util.Collections;
 import java.util.List;
@@ -45,6 +47,15 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
     private CommentMapper commentMapper;
     @Autowired
     private LikeRecordMapper likeRecordMapper;
+
+
+    @Value("${pressure.enabled:false}")
+    private boolean pressureEnabled;
+
+    private boolean isPressureTest() {
+        return pressureEnabled;
+    }
+
 
     @Override
     public ResponseResult answerFeed(Integer pageNum, Integer pageSize) {
@@ -190,6 +201,13 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
         //TODO 后期先装redis，定时写入mysql
 
         Long userId = BaseContext.getCurrentId();
+
+
+
+        // 压测模式下，允许 body 覆盖 userId
+        if (id != null && isPressureTest()) {
+            userId = id;
+        }
 
         LikeVo likeVo = new LikeVo();
 
