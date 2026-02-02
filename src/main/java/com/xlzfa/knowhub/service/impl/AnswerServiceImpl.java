@@ -23,6 +23,7 @@ import com.xlzfa.knowhub.service.UserService;
 import com.xlzfa.knowhub.util.BaseContext;
 import com.xlzfa.knowhub.util.BeanCopyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -47,6 +48,8 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
     private CommentMapper commentMapper;
     @Autowired
     private LikeRecordMapper likeRecordMapper;
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
 
 
     @Value("${pressure.enabled:false}")
@@ -198,7 +201,6 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
     @Override
     public ResponseResult updateLike(Long id, boolean like) {
 
-        //TODO 后期先装redis，定时写入mysql
 
         Long userId = BaseContext.getCurrentId();
 
