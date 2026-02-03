@@ -28,10 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
 
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -198,121 +195,156 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 
     }
 
+
     @Override
     public ResponseResult updateLike(Long id, boolean like) {
 
-
         Long userId = BaseContext.getCurrentId();
 
-
-
-        // 压测模式下，允许 body 覆盖 userId
+        // 压测模式
         if (id != null && isPressureTest()) {
             userId = id;
         }
 
+        String userKey = "answer:like:users:" + id;
+        String countKey = "answer:like:count:" + id;
+        String dirtyKey = "answer:like:dirty";
+
+        List<Long> result = redisTemplate.execute(
+                likeLuaScript,
+                Arrays.asList(userKey, countKey, dirtyKey),
+                userId.toString(),
+                id.toString()
+        );
+
+        Integer liked = result.get(0).intValue();
+        Long likeCount = result.get(1);
+
         LikeVo likeVo = new LikeVo();
-
-        likeVo.setLiked(true);
-
-        Answer answer = baseMapper.selectById(id);
-
-        Long likeCount = answer.getLikeCount();
-
-        //如果是要点赞
-        if (like){
-
-            Long islike = findLikeRecord(userId, id);
-
-            if (islike > 0L){
-
-                this.lambdaUpdate()
-                        .setSql("like_count = IF(like_count > 0, like_count - 1, 0)")
-                        .eq(Answer::getId, id)
-                        .update();
-
-                likeCount--;
-
-                likeRecordMapper.deleteById(islike);
-                likeVo.setLiked(false);
-            }else {
-                this.lambdaUpdate()
-                        .setSql("like_count = like_count + 1")
-                        .eq(Answer::getId, id)
-                        .update();
-
-                LikeRecord newlike = LikeRecord.builder()
-                        .userId(userId)
-                        .targetType(1)
-                        .targetId(id)
-                        .build();
-
-                likeCount++;
-
-                likeRecordMapper.insert(newlike);
-            }
-
-
-        }else {
-
-            Long islike = findLikeRecord(userId, id);
-
-            if (islike == 0L){
-
-                this.lambdaUpdate()
-                        .setSql("like_count = like_count + 1")
-                        .eq(Answer::getId, id)
-                        .update();
-
-                LikeRecord newlike = LikeRecord.builder()
-                        .userId(userId)
-                        .targetType(1)
-                        .targetId(id)
-                        .build();
-
-                likeCount++;
-
-                likeRecordMapper.insert(newlike);
-            }else {
-
-                this.lambdaUpdate()
-                        .setSql("like_count = IF(like_count > 0, like_count - 1, 0)")
-                        .eq(Answer::getId, id)
-                        .update();
-
-                likeCount--;
-
-                likeRecordMapper.deleteById(islike);
-                likeVo.setLiked(false);
-            }
-
-
-        }
-
+        likeVo.setLiked(liked == 1);
         likeVo.setLikeCount(likeCount);
 
         return ResponseResult.success(likeVo);
-
-
     }
 
-    public Long findLikeRecord(Long userId, Long answerId){
-
-        LambdaQueryWrapper<LikeRecord> wrapper = new LambdaQueryWrapper<>();
-
-        wrapper.eq(LikeRecord::getTargetType, 1)
-                .eq(LikeRecord::getUserId, userId)
-                .eq(LikeRecord::getTargetId, answerId);
-
-        if (likeRecordMapper.selectOne(wrapper) != null){
-            return likeRecordMapper.selectOne(wrapper).getId();
-        }else {
-            return 0L;
-        }
 
 
 
-    }
+//    @Override
+//    public ResponseResult updateLike(Long id, boolean like) {
+//
+//
+//        Long userId = BaseContext.getCurrentId();
+//
+//
+//
+//        // 压测模式下，允许 body 覆盖 userId
+//        if (id != null && isPressureTest()) {
+//            userId = id;
+//        }
+//
+//        LikeVo likeVo = new LikeVo();
+//
+//        likeVo.setLiked(true);
+//
+//        Answer answer = baseMapper.selectById(id);
+//
+//        Long likeCount = answer.getLikeCount();
+//
+//        //如果是要点赞
+//        if (like){
+//
+//            Long islike = findLikeRecord(userId, id);
+//
+//            if (islike > 0L){
+//
+//                this.lambdaUpdate()
+//                        .setSql("like_count = IF(like_count > 0, like_count - 1, 0)")
+//                        .eq(Answer::getId, id)
+//                        .update();
+//
+//                likeCount--;
+//
+//                likeRecordMapper.deleteById(islike);
+//                likeVo.setLiked(false);
+//            }else {
+//                this.lambdaUpdate()
+//                        .setSql("like_count = like_count + 1")
+//                        .eq(Answer::getId, id)
+//                        .update();
+//
+//                LikeRecord newlike = LikeRecord.builder()
+//                        .userId(userId)
+//                        .targetType(1)
+//                        .targetId(id)
+//                        .build();
+//
+//                likeCount++;
+//
+//                likeRecordMapper.insert(newlike);
+//            }
+//
+//
+//        }else {
+//
+//            Long islike = findLikeRecord(userId, id);
+//
+//            if (islike == 0L){
+//
+//                this.lambdaUpdate()
+//                        .setSql("like_count = like_count + 1")
+//                        .eq(Answer::getId, id)
+//                        .update();
+//
+//                LikeRecord newlike = LikeRecord.builder()
+//                        .userId(userId)
+//                        .targetType(1)
+//                        .targetId(id)
+//                        .build();
+//
+//                likeCount++;
+//
+//                likeRecordMapper.insert(newlike);
+//            }else {
+//
+//                this.lambdaUpdate()
+//                        .setSql("like_count = IF(like_count > 0, like_count - 1, 0)")
+//                        .eq(Answer::getId, id)
+//                        .update();
+//
+//                likeCount--;
+//
+//                likeRecordMapper.deleteById(islike);
+//                likeVo.setLiked(false);
+//            }
+//
+//
+//        }
+//
+//        likeVo.setLikeCount(likeCount);
+//
+//        return ResponseResult.success(likeVo);
+//
+//
+//    }
+//
+//    public Long findLikeRecord(Long userId, Long answerId){
+//
+//        LambdaQueryWrapper<LikeRecord> wrapper = new LambdaQueryWrapper<>();
+//
+//        wrapper.eq(LikeRecord::getTargetType, 1)
+//                .eq(LikeRecord::getUserId, userId)
+//                .eq(LikeRecord::getTargetId, answerId);
+//
+//        if (likeRecordMapper.selectOne(wrapper) != null){
+//            return likeRecordMapper.selectOne(wrapper).getId();
+//        }else {
+//            return 0L;
+//        }
+//
+//
+//
+//    }
 
     @Override
     public ResponseResult addAnswer(AnswerAddDto answerAddDto) {

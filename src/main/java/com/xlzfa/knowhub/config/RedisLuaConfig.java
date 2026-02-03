@@ -15,9 +15,13 @@ public class RedisLuaConfig {
         script.setScriptText(
                 "-- KEYS[1]: 用户点赞集合\n" +
                         "-- KEYS[2]: 点赞数\n" +
+                        "-- KEYS[3]: dirty set\n" +
                         "-- ARGV[1]: userId\n" +
+                        "-- ARGV[2]: answerId\n" +
 
                         "local userId = ARGV[1]\n" +
+                        "local answerId = ARGV[2]\n" +
+
                         "if redis.call('SISMEMBER', KEYS[1], userId) == 1 then\n" +
                         "   redis.call('SREM', KEYS[1], userId)\n" +
                         "   local count = redis.call('DECR', KEYS[2])\n" +
@@ -25,10 +29,12 @@ public class RedisLuaConfig {
                         "       redis.call('SET', KEYS[2], 0)\n" +
                         "       count = 0\n" +
                         "   end\n" +
+                        "   redis.call('SADD', KEYS[3], answerId)\n" +
                         "   return {0, count}\n" +
                         "else\n" +
                         "   redis.call('SADD', KEYS[1], userId)\n" +
                         "   local count = redis.call('INCR', KEYS[2])\n" +
+                        "   redis.call('SADD', KEYS[3], answerId)\n" +
                         "   return {1, count}\n" +
                         "end"
         );
