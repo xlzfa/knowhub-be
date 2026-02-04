@@ -24,6 +24,7 @@ import com.xlzfa.knowhub.util.BaseContext;
 import com.xlzfa.knowhub.util.BeanCopyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -47,6 +48,9 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
     private LikeRecordMapper likeRecordMapper;
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
+    @Autowired
+    private DefaultRedisScript<List> likeLuaScript;
+
 
 
     @Value("${pressure.enabled:false}")
