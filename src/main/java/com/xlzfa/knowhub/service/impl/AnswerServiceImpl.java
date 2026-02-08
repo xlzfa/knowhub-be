@@ -24,6 +24,7 @@ import com.xlzfa.knowhub.util.BaseContext;
 import com.xlzfa.knowhub.util.BeanCopyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
@@ -50,6 +51,9 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
     private RedisTemplate<String, Object> redisTemplate;
     @Autowired
     private DefaultRedisScript<List> likeLuaScript;
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+
 
 
 
@@ -214,7 +218,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
         String countKey = "answer:like:count:" + id;
         String dirtyKey = "answer:like:dirty";
 
-        List<Long> result = redisTemplate.execute(
+        List<Long> result = stringRedisTemplate.execute(
                 likeLuaScript,
                 Arrays.asList(userKey, countKey, dirtyKey),
                 userId.toString(),

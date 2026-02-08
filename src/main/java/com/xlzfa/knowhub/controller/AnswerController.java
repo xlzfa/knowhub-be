@@ -8,6 +8,7 @@ import com.xlzfa.knowhub.service.AnswerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -42,5 +43,35 @@ public class AnswerController {
     public ResponseResult myAnswer(@RequestParam Long userId){
         return answerService.myAnswer(userId);
     }
+
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+
+    @GetMapping("/redis/ping")
+    public String redisPing() {
+        try {
+            return stringRedisTemplate.execute(
+                    (org.springframework.data.redis.core.RedisCallback<String>)
+                            connection -> connection.ping()
+            );
+        } catch (Exception e) {
+            e.printStackTrace(); // ⭐关键
+            throw e;
+        }
+    }
+
+
+    @Autowired
+    private org.springframework.core.env.Environment env;
+
+    @GetMapping("/redis/env")
+    public String redisEnv() {
+        return "host=" + env.getProperty("spring.redis.host")
+                + ", port=" + env.getProperty("spring.redis.port")
+                + ", user=" + env.getProperty("spring.redis.username")
+                + ", password=" + env.getProperty("spring.redis.password");
+    }
+
+
 
 }
