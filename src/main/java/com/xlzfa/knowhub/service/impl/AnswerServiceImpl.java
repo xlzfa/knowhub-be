@@ -115,6 +115,12 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
                 .collect(Collectors.toMap(User::getId, u -> u));
 
 
+        //拿id列表
+        List<Long> answerIds = vos.stream()
+                .map(AnswerVo::getId)
+                .collect(Collectors.toList());
+
+
         //查是否点赞过
         List<LikeRecord> likeRecords = likeRecordMapper.selectList(
                 new LambdaQueryWrapper<LikeRecord>()
@@ -126,11 +132,9 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
                 .map(LikeRecord::getTargetId)
                 .collect(Collectors.toSet());
 
+
         //查所有评论
 
-        List<Long> answerIds = vos.stream()
-                .map(AnswerVo::getId)
-                .collect(Collectors.toList());
 
         List<Comment> comments = commentMapper.selectList(
                 new LambdaQueryWrapper<Comment>()
@@ -187,6 +191,8 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 
             vo.setLiked(likedAnswerIds.contains(vo.getId()));
 
+            vo.setLikeCount(likeCountMap.get(vo.getId()));
+
             vo.setQuertionTitle(questionTitlesMap.get(vo.getQuestionId()));
 
             List<CommentVo> commentVos = commentMap.getOrDefault(vo.getId(), Collections.emptyList());
@@ -231,6 +237,22 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
         LikeVo likeVo = new LikeVo();
         likeVo.setLiked(liked == 1);
         likeVo.setLikeCount(likeCount);
+
+        if(liked == 1){
+            LikeRecord build = LikeRecord.builder()
+                    .userId(userId)
+                    .targetId(id)
+                    .targetType(1)
+                    .build();
+            likeRecordMapper.insert(build);
+        }else {
+            likeRecordMapper.delete(
+                    new LambdaQueryWrapper<LikeRecord>()
+                            .eq(LikeRecord::getUserId, userId)
+                            .eq(LikeRecord::getTargetId, id)
+                            .eq(LikeRecord::getTargetType, 1)
+            );
+        }
 
         return ResponseResult.success(likeVo);
     }
