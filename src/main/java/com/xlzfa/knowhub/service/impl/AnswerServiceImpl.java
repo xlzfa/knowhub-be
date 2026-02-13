@@ -133,6 +133,21 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
                 .collect(Collectors.toSet());
 
 
+        //在redis拿点赞数
+        List<String> keys = answerIds.stream()
+                .map(id -> "answer:like:count:" + id)
+                .collect(Collectors.toList());
+
+
+        List<Object> likeCounts = redisTemplate.opsForValue().multiGet(keys);
+
+        HashMap<Long, Long> likeCountMap = new HashMap<>();
+
+        for (int i = 0; i < answerIds.size(); i++){
+            Object countObj = likeCounts.get(i);
+            Long count = countObj == null ? 0L : Long.parseLong(countObj.toString());
+            likeCountMap.put(answerIds.get(i),count);
+        }
         //查所有评论
 
 
