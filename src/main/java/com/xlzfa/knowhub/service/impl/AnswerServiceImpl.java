@@ -243,7 +243,8 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
                 likeLuaScript,
                 Arrays.asList(userKey, countKey, dirtyKey),
                 userId.toString(),
-                id.toString()
+                id.toString(),
+                like ? "1" : "0"
         );
 
         Integer liked = result.get(0).intValue();
