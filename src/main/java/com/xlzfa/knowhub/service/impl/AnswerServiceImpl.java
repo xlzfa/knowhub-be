@@ -261,6 +261,10 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
                     .targetType(1)
                     .build();
             likeRecordMapper.insert(build);
+            this.lambdaUpdate()
+                        .setSql("like_count = like_count + 1")
+                        .eq(Answer::getId, id)
+                        .update();
         }else {
             likeRecordMapper.delete(
                     new LambdaQueryWrapper<LikeRecord>()
@@ -268,6 +272,10 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
                             .eq(LikeRecord::getTargetId, id)
                             .eq(LikeRecord::getTargetType, 1)
             );
+            this.lambdaUpdate()
+                        .setSql("like_count = IF(like_count > 0, like_count - 1, 0)")
+                        .eq(Answer::getId, id)
+                        .update();
         }
 
         return ResponseResult.success(likeVo);
