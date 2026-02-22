@@ -14,4 +14,6 @@ public interface AnswerService extends IService<Answer> {
 
     ResponseResult myAnswer(Long userId);
 
+    void likeSql(Long userId, Long id, Integer liked);
+
 }

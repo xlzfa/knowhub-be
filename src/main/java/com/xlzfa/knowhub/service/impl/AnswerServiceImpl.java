@@ -3,6 +3,7 @@ package com.xlzfa.knowhub.service.impl;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -30,6 +31,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import java.util.*;
@@ -268,6 +270,40 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 
 
         return ResponseResult.success(likeVo);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void likeSql(Long userId, Long id, Integer liked) {
+
+        if(liked == 1){
+            LikeRecord build = LikeRecord.builder()
+                    .userId(userId)
+                    .targetId(id)
+                    .targetType(1)
+                    .build();
+            likeRecordMapper.insert(build);
+            answerMapper.update(
+                    null,
+                    new UpdateWrapper<Answer>()
+                            .setSql("like_count = like_count + 1")
+                            .eq("id", id)
+            );
+        }else {
+            likeRecordMapper.delete(
+                    new LambdaQueryWrapper<LikeRecord>()
+                            .eq(LikeRecord::getUserId, userId)
+                            .eq(LikeRecord::getTargetId, id)
+                            .eq(LikeRecord::getTargetType, 1)
+            );
+            answerMapper.update(
+                    null,
+                    new UpdateWrapper<Answer>()
+                            .setSql("like_count = IF(like_count > 0, like_count - 1, 0)")
+                            .eq("id", id)
+            );
+        }
+
     }
 
 

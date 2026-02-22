@@ -264,7 +264,6 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
     @Override
     public ResponseResult updateLike(Long id, boolean like) {
 
-        //TODO 后期先装redis，定时写入mysql
 
         Long userId = BaseContext.getCurrentId();
 

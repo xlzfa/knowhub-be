@@ -8,11 +8,13 @@ import com.xlzfa.knowhub.dao.AnswerMapper;
 import com.xlzfa.knowhub.dao.LikeRecordMapper;
 import com.xlzfa.knowhub.domain.pojo.Answer;
 import com.xlzfa.knowhub.domain.pojo.LikeRecord;
+import com.xlzfa.knowhub.service.AnswerService;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 
@@ -23,13 +25,10 @@ public class AnswerConsumer {
 
 
     @Autowired
-    private LikeRecordMapper likeRecordMapper;
-
-    @Autowired
-    private AnswerMapper answerMapper;
-
-    @Autowired
     private StringRedisTemplate redisTemplate;
+
+    @Autowired
+    private AnswerService answerService;
 
 
 
@@ -45,44 +44,21 @@ public class AnswerConsumer {
 
 
         try {
-            if(liked == 1){
-                LikeRecord build = LikeRecord.builder()
-                        .userId(userId)
-                        .targetId(id)
-                        .targetType(1)
-                        .build();
-                likeRecordMapper.insert(build);
-                answerMapper.update(
-                        null,
-                        new UpdateWrapper<Answer>()
-                                .setSql("like_count = like_count + 1")
-                                .eq("id", id)
-                );
-            }else {
-                likeRecordMapper.delete(
-                        new LambdaQueryWrapper<LikeRecord>()
-                                .eq(LikeRecord::getUserId, userId)
-                                .eq(LikeRecord::getTargetId, id)
-                                .eq(LikeRecord::getTargetType, 1)
-                );
-                answerMapper.update(
-                        null,
-                        new UpdateWrapper<Answer>()
-                                .setSql("like_count = IF(like_count > 0, like_count - 1, 0)")
-                                .eq("id", id)
-                );
-            }
+
+
+            answerService.likeSql(userId,id,liked);
 
             redisTemplate.opsForSet().remove("answer:like:dirty", id.toString());
 
         } catch (Exception e) {
-        e.printStackTrace();
+            throw e;
         // MQ 会自动重试
     }
 
 
 
     }
+
 
 
 }
