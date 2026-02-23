@@ -63,4 +63,24 @@ public class RabbitConfig {
         return template;
     }
 
+
+    //死信
+
+    @Bean
+    public DirectExchange deadLetterExchange() {
+        return new DirectExchange("answer.dlx.exchange");
+    }
+
+    @Bean
+    public Queue deadLetterQueue() {
+        return new Queue("answer.like.dlq");
+    }
+
+    @Bean
+    public Binding deadLetterBinding() {
+        return BindingBuilder.bind(deadLetterQueue())
+                .to(deadLetterExchange())
+                .with("dlx.routing");
+    }
+
 }
