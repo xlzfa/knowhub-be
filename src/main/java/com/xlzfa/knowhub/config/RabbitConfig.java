@@ -11,6 +11,9 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Configuration
 public class RabbitConfig {
 
@@ -27,11 +30,21 @@ public class RabbitConfig {
 
     @Bean
     public Queue answerLikeQueue() {
-        return new Queue(ANSWER_LIKE_QUEUE,true);
+
+        Map<String, Object> args = new HashMap<>();
+
+        args.put("x-dead-letter-exchange", "answer.dlx.exchange");
+
+        args.put("x-dead-letter-routing-key", "dlx.routing");
+
+        return new Queue(ANSWER_LIKE_QUEUE,true,false, false, args);
+
+
     }
 
     @Bean
     public Queue questionLikeQueue() {
+
         return new Queue(QUESTION_LIKE_QUEUE,true);
     }
 

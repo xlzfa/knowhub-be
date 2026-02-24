@@ -15,6 +15,9 @@ public class RabbitListenerConfig {
         factory.setConnectionFactory(connectionFactory);
         // 消费端也使用 JSON
         factory.setMessageConverter(new Jackson2JsonMessageConverter());
+
+        factory.setDefaultRequeueRejected(false);
+
         return factory;
     }
 }

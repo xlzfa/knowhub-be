@@ -42,18 +42,19 @@ public class AnswerConsumer {
         Integer liked = Integer.parseInt(msg.get("liked").toString());
 
 
+        throw new RuntimeException("test DLQ");
 
-        try {
 
-
-            answerService.likeSql(userId,id,liked);
-
-            redisTemplate.opsForSet().remove("answer:like:dirty", id.toString());
-
-        } catch (Exception e) {
-            throw e;
-        // MQ 会自动重试
-    }
+//        try {
+//
+//
+//            answerService.likeSql(userId,id,liked);
+//
+//            redisTemplate.opsForSet().remove("answer:like:dirty", id.toString());
+//
+//        } catch (Exception e) {
+//            throw e;
+//    }
 
 
 
