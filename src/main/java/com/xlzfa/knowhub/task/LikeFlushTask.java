@@ -1,11 +1,18 @@
 package com.xlzfa.knowhub.task;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.xlzfa.knowhub.dao.AnswerMapper;
+import com.xlzfa.knowhub.dao.LikeRecordMapper;
+import com.xlzfa.knowhub.domain.pojo.Answer;
+import com.xlzfa.knowhub.domain.pojo.LikeRecord;
 import com.xlzfa.knowhub.service.AnswerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Set;
 
 @Component
@@ -17,6 +24,12 @@ public class LikeFlushTask {
 
     @Autowired
     private AnswerService answerService;
+
+    @Autowired
+    private AnswerMapper answerMapper;
+
+    @Autowired
+    private LikeRecordMapper likeRecordMapper;
 
     private static final String DIRTY_KEY = "answer:like:dirty";
     private static final String USER_KEY = "answer:like:users:";
@@ -36,17 +49,40 @@ public class LikeFlushTask {
             try {
                 String userKey = USER_KEY + answerId;
                 Set<String> userSet = stringRedisTemplate.opsForSet().members(userKey);
-                if (userSet == null) continue;
 
-                // 假设我们记录了全量点赞状态，每个用户都算 liked=1
-                for (String userIdStr : userSet) {
-                    answerService.likeSql(Long.parseLong(userIdStr), Long.parseLong(answerId), 1);
+                String countKey = COUNT_KEY + answerId;
+
+                String count = stringRedisTemplate.opsForValue().get(countKey);
+
+                Long likeCount = (count == null) ? 0 : Long.parseLong(count);
+
+                answerMapper.update(
+                        null,
+                        new UpdateWrapper<Answer>()
+                                .set("like_count", likeCount)
+                                .eq("id", answerId)
+                );
+
+                likeRecordMapper.delete(new LambdaQueryWrapper<LikeRecord>()
+                        .eq(LikeRecord::getTargetId, answerId)
+                        .eq(LikeRecord::getTargetType, 1)
+                );
+
+
+                if (userSet != null && !userSet.isEmpty()) {
+                    List<LikeRecord> records = userSet.stream()
+                            .map(uidStr -> LikeRecord.builder()
+                                    .userId(Long.parseLong(uidStr))
+                                    .targetId(Long.parseLong(answerId))
+                                    .targetType(1)
+                                    .build())
+                            .toList();
+                    // 批量插入
+                    records.forEach(likeRecordMapper::insert);
                 }
 
-                // 处理取消点赞的用户：可以用一个单独集合，或在每个用户的 liked 状态里记录 liked=0
-                // 这里简单示例，如果你有取消记录，记得遍历处理 liked=0
 
-                // 清理 dirty 标记
+
                 stringRedisTemplate.opsForSet().remove(DIRTY_KEY, answerId);
             } catch (Exception e) {
                 System.err.println("定时任务落库失败 answerId=" + answerId);
