@@ -11,5 +11,6 @@ public class DeadLetterConsumer {
 
         System.err.println("死信消息: " + msg);
 
+
     }
 }
