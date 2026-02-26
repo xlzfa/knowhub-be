@@ -244,10 +244,12 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
         String userKey = "answer:like:users:" + id;
         String countKey = "answer:like:count:" + id;
         String dirtyKey = "answer:like:dirty";
+        String addKey = "answer:like:add:" + id;
+        String removeKey = "answer:like:remove:" + id;
 
         List<Long> result = stringRedisTemplate.execute(
                 likeLuaScript,
-                Arrays.asList(userKey, countKey, dirtyKey),
+                Arrays.asList(userKey, countKey, dirtyKey, addKey, removeKey),
                 userId.toString(),
                 id.toString(),
                 like ? "1" : "0"
