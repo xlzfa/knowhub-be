@@ -50,7 +50,24 @@ public class AnswerConsumer {
 
             answerService.likeSql(userId,id,liked);
 
-            redisTemplate.opsForSet().remove("answer:like:dirty", id.toString());
+
+            String recordKey = id + ":" + userId;
+
+            String addKey = "answer:like:add:" + id;
+            String removeKey = "answer:like:remove:" + id;
+
+            redisTemplate.opsForSet().remove(addKey, recordKey);
+            redisTemplate.opsForSet().remove(removeKey, recordKey);
+
+            Long addSize = redisTemplate.opsForSet().size(addKey);
+            Long removeSize = redisTemplate.opsForSet().size(removeKey);
+
+            boolean addEmpty = (addSize == null || addSize == 0);
+            boolean removeEmpty = (removeSize == null || removeSize == 0);
+
+            if (addEmpty && removeEmpty) {
+                redisTemplate.opsForSet().remove("answer:like:dirty", id.toString());
+            }
 
         } catch (Exception e) {
             throw e;
