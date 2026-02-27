@@ -279,31 +279,40 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
     public void likeSql(Long userId, Long id, Integer liked) {
 
         if(liked == 1){
-            LikeRecord build = LikeRecord.builder()
-                    .userId(userId)
-                    .targetId(id)
-                    .targetType(1)
-                    .build();
-            likeRecordMapper.insert(build);
-            answerMapper.update(
-                    null,
-                    new UpdateWrapper<Answer>()
-                            .setSql("like_count = like_count + 1")
-                            .eq("id", id)
-            );
+            int rows = likeRecordMapper.insertIgnore(userId, id, 1);
+            if (rows > 0){
+//                LikeRecord build = LikeRecord.builder()
+//                        .userId(userId)
+//                        .targetId(id)
+//                        .targetType(1)
+//                        .build();
+//                likeRecordMapper.insert(build);
+                answerMapper.update(
+                        null,
+                        new UpdateWrapper<Answer>()
+                                .setSql("like_count = like_count + 1")
+                                .eq("id", id)
+                );
+            }
+
         }else {
-            likeRecordMapper.delete(
+            int rows = likeRecordMapper.delete(
                     new LambdaQueryWrapper<LikeRecord>()
                             .eq(LikeRecord::getUserId, userId)
                             .eq(LikeRecord::getTargetId, id)
                             .eq(LikeRecord::getTargetType, 1)
             );
-            answerMapper.update(
-                    null,
-                    new UpdateWrapper<Answer>()
-                            .setSql("like_count = IF(like_count > 0, like_count - 1, 0)")
-                            .eq("id", id)
-            );
+
+            // 只有真正删除成功才减1
+
+            if (rows > 0) {
+                answerMapper.update(
+                        null,
+                        new UpdateWrapper<Answer>()
+                                .setSql("like_count = IF(like_count > 0, like_count - 1, 0)")
+                                .eq("id", id)
+                );
+            }
         }
 
     }
